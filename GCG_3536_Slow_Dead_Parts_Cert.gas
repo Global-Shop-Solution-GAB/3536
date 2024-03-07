@@ -1,0 +1,331 @@
+Program.Sub.ScreenSU.Start
+gui.SS_Slow_Dead_Parts..create
+gui.SS_Slow_Dead_Parts..caption("Slow/Dead Parts")
+gui.SS_Slow_Dead_Parts..size(2640,1755)
+gui.SS_Slow_Dead_Parts..minx(0)
+gui.SS_Slow_Dead_Parts..miny(0)
+gui.SS_Slow_Dead_Parts..position(12600,5670)
+gui.SS_Slow_Dead_Parts..event(unload,SS_Slow_Dead_Parts_Unload)
+gui.SS_Slow_Dead_Parts..alwaysontop(False)
+gui.SS_Slow_Dead_Parts..fontname("Arial")
+gui.SS_Slow_Dead_Parts..fontsize(8)
+gui.SS_Slow_Dead_Parts..forecolor(0)
+gui.SS_Slow_Dead_Parts..fontstyle(,,,,)
+gui.SS_Slow_Dead_Parts..BackColor(-2147483633)
+gui.SS_Slow_Dead_Parts..controlbox(True)
+gui.SS_Slow_Dead_Parts..maxbutton(False)
+gui.SS_Slow_Dead_Parts..minbutton(False)
+gui.SS_Slow_Dead_Parts..mousepointer(0)
+gui.SS_Slow_Dead_Parts..moveable(True)
+gui.SS_Slow_Dead_Parts..sizeable(False)
+gui.SS_Slow_Dead_Parts..ShowInTaskBar(True)
+gui.SS_Slow_Dead_Parts..titlebar(True)
+gui.SS_Slow_Dead_Parts.lbl1.create(label,"Select Slow, Dead, or All Parts",True,2305,220,1,100,100,True,0,Arial,8,-2147483633,0)
+gui.SS_Slow_Dead_Parts.lbl1.defaultvalue("")
+gui.SS_Slow_Dead_Parts.lbl1.controlgroup(0)
+gui.SS_Slow_Dead_Parts.cboSDP.create(combobox)
+gui.SS_Slow_Dead_Parts.cboSDP.text("")
+gui.SS_Slow_Dead_Parts.cboSDP.visible(True)
+gui.SS_Slow_Dead_Parts.cboSDP.size(2220,330)
+gui.SS_Slow_Dead_Parts.cboSDP.zorder(0)
+gui.SS_Slow_Dead_Parts.cboSDP.position(100,300)
+gui.SS_Slow_Dead_Parts.cboSDP.enabled(True)
+gui.SS_Slow_Dead_Parts.cboSDP.fontname("Arial")
+gui.SS_Slow_Dead_Parts.cboSDP.fontsize(8)
+gui.SS_Slow_Dead_Parts.cboSDP.defaultvalue("")
+gui.SS_Slow_Dead_Parts.cboSDP.controlgroup(0)
+gui.SS_Slow_Dead_Parts.cmdPrint.create(button)
+gui.SS_Slow_Dead_Parts.cmdPrint.caption("Print")
+gui.SS_Slow_Dead_Parts.cmdPrint.visible(True)
+gui.SS_Slow_Dead_Parts.cmdPrint.size(1000,360)
+gui.SS_Slow_Dead_Parts.cmdPrint.zorder(0)
+gui.SS_Slow_Dead_Parts.cmdPrint.position(100,750)
+gui.SS_Slow_Dead_Parts.cmdPrint.enabled(True)
+gui.SS_Slow_Dead_Parts.cmdPrint.fontname("Arial")
+gui.SS_Slow_Dead_Parts.cmdPrint.fontsize(8)
+gui.SS_Slow_Dead_Parts.cmdPrint.event(click,cmdPrint_Click)
+gui.SS_Slow_Dead_Parts.cmdPrint.defaultvalue("")
+gui.SS_Slow_Dead_Parts.cmdPrint.controlgroup(0)
+gui.SS_Slow_Dead_Parts.cboSDP.tabstop(True)
+gui.SS_Slow_Dead_Parts.cboSDP.tabindex(1)
+gui.SS_Slow_Dead_Parts.cmdPrint.tabstop(True)
+gui.SS_Slow_Dead_Parts.cmdPrint.tabindex(2)
+
+
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+
+Variable.UDT.uPart.Define("BIRUNID",Long)
+Variable.UDT.uPart.Define("PART",String,PART)
+Variable.UDT.uPart.Define("LOCATION",String,LOCATION)
+Variable.UDT.uPart.Define("DATE_HISTORY",Date,DATE_HISTORY)
+Variable.UDT.uPart.Define("CODE_TRANSACTION",String,CODE_TRANSACTION)
+Variable.UDT.uPart.Define("TRANSACTION_DESC",String,TRANSACTION_DESC)
+Variable.UDT.uPart.Define("DESCRIPTION",String,DESCRIPTION)
+Variable.UDT.uPart.Define("QTY_ONHAND",Float,QTY_ONHAND)
+Variable.UDT.uPart.Define("AMT_COST",Float,AMT_COST)
+Variable.UDT.uPart.Define("TYPE",String,TYPE)
+Variable.uGlobal.uPart.Declare("uPart")
+Variable.Global.iBIRUNID.Declare(Long,0)
+Variable.Global.iLogID.Declare(Long,0)
+Variable.Global.dSlowDate.Declare(Date,1/1/1900)
+Variable.Global.dDeadDate.Declare(Date,1/1/1900)
+Variable.Global.dHist.Declare(Date,1/1/1900)
+Variable.Global.sPart.Declare(String)
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+F.Intrinsic.Control.SetErrorHandler("Main_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+F.ODBC.Connection!con.OpenConnection(V.Ambient.PDSN,V.Ambient.PUser,V.Ambient.PPass)
+
+Gui.SS_Slow_Dead_Parts.cboSDP.AddItem("All Parts")
+Gui.SS_Slow_Dead_Parts.cboSDP.AddItem("Slow Parts")
+Gui.SS_Slow_Dead_Parts.cboSDP.AddItem("Dead Parts")
+Gui.SS_Slow_Dead_Parts..Show
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("Main_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3536_Slow_Dead_Parts_Cert.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Ss_slow_dead_parts_unload)
+Function.Intrinsic.Control.EndIf
+
+
+Program.Sub.Main.End
+
+Program.Sub.SS_Slow_Dead_Parts_Unload.Start
+F.Intrinsic.Control.SetErrorHandler("SS_Slow_Dead_Parts_Unload_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+F.ODBC.Connection!con.Close
+F.Intrinsic.Control.End
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("SS_Slow_Dead_Parts_Unload_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3536_Slow_Dead_Parts_Cert.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Ss_slow_dead_parts_unload)
+Function.Intrinsic.Control.EndIf
+
+
+Program.Sub.SS_Slow_Dead_Parts_Unload.End
+
+Program.Sub.cmdPrint_Click.Start
+F.Intrinsic.Control.SetErrorHandler("cmdPrint_Click_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+V.Local.sType.Declare(String)
+V.Local.sSQL.Declare(String)
+
+F.Intrinsic.Control.If(V.Screen.SS_Slow_Dead_Parts!cboSDP.Text,=,"")
+	F.Intrinsic.UI.Msgbox("You must select a filter.")
+	F.Intrinsic.Control.ExitSub
+F.Intrinsic.Control.EndIf
+
+Gui.SS_Slow_Dead_Parts..Visible(False)
+F.Intrinsic.UI.InvokeWaitDialog("Please wait while report is generated.","Printing Report")
+
+F.Global.BI.GetRunID(V.Global.iBIRUNID)
+F.Global.BI.StartLogging(V.Global.iBIRUNID,-1,-1,"Slow/Dead Parts",V.Global.iLogID)
+
+F.Intrinsic.Date.DateAdd("D",-182,V.Ambient.Date,V.Global.dSlowDate)
+F.Intrinsic.Date.DateAdd("D",-365,V.Ambient.Date,V.Global.dDeadDate)
+
+V.uGlobal.uPart.Redim(-1,-1)
+V.Local.sType.Set(V.Screen.SS_Slow_Dead_Parts!cboSDP.Text)
+
+V.Local.sSQL.Set("SELECT H.PART, MAX(H.DATE_HISTORY) AS DATE_HISTORY FROM V_INVENTORY_HIST H, V_INVENTORY_MSTR M WHERE H.CODE_TRANSACTION <> 'P16' AND H.CODE_TRANSACTION <> 'P18' AND H.PART <> '' AND H.PART = M.PART AND M.QTY_ONHAND > '0' GROUP BY H.Part")
+F.ODBC.Connection!con.OpenLocalRecordsetRO("rst",V.Local.sSQL)
+
+F.Intrinsic.Control.If(V.Local.sType,=,"All Parts")
+
+	F.Intrinsic.Control.If(V.ODBC.con!rst.EOF,<>,True)
+		F.Intrinsic.Control.DoUntil(V.ODBC.con!rst.EOF,=,True)
+			V.Global.sPart.Set(V.ODBC.con!rst.FieldValTrim!PART)
+			V.Global.dHist.Set(V.ODBC.con!rst.FieldValTrim!DATE_HISTORY)
+			
+			'Slow Part
+			F.Intrinsic.Control.If(V.Global.dHist.PervasiveDate,<=,V.Global.dSlowDate.PervasiveDate,"AND",V.Global.dHist.PervasiveDate,>,V.Global.dDeadDate.PervasiveDate)
+				F.Intrinsic.Control.CallSub(Loadpartudt,"sType","Slow")
+			'Dead Part
+			F.Intrinsic.Control.ElseIf(V.Global.dHist.PervasiveDate,<,V.Global.dDeadDate.PervasiveDate)
+				F.Intrinsic.Control.CallSub(Loadpartudt,"sType","Dead")
+			'Neither
+			F.Intrinsic.Control.Else
+				F.Intrinsic.Control.CallSub(Loadpartudt,"sType","N/A")
+			F.Intrinsic.Control.EndIf
+
+			F.ODBC.con!rst.MoveNext
+		F.Intrinsic.Control.Loop
+	F.Intrinsic.Control.EndIf
+
+	F.ODBC.con!rst.Close
+F.Intrinsic.Control.ElseIf(V.Local.sType,=,"Slow Parts")
+
+	F.Intrinsic.Control.If(V.ODBC.con!rst.EOF,<>,True)
+		F.Intrinsic.Control.DoUntil(V.ODBC.con!rst.EOF,=,True)
+			V.Global.sPart.Set(V.ODBC.con!rst.FieldValTrim!PART)
+			V.Global.dHist.Set(V.ODBC.con!rst.FieldValTrim!DATE_HISTORY)
+
+			'Slow Part
+			F.Intrinsic.Control.If(V.Global.dHist.PervasiveDate,<=,V.Global.dSlowDate.PervasiveDate,"AND",V.Global.dHist.PervasiveDate,>,V.Global.dDeadDate.PervasiveDate)
+				F.Intrinsic.Control.CallSub(Loadpartudt,"sType","Slow")
+			F.Intrinsic.Control.EndIf
+
+			F.ODBC.con!rst.MoveNext
+		F.Intrinsic.Control.Loop
+	F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.ElseIf(V.Local.sType,=,"Dead Parts")
+
+	F.Intrinsic.Control.If(V.ODBC.con!rst.EOF,<>,True)
+		F.Intrinsic.Control.DoUntil(V.ODBC.con!rst.EOF,=,True)
+			V.Global.sPart.Set(V.ODBC.con!rst.FieldValTrim!PART)
+			V.Global.dHist.Set(V.ODBC.con!rst.FieldValTrim!DATE_HISTORY)
+
+			'Dead Part
+			F.Intrinsic.Control.If(V.Global.dHist.PervasiveDate,<,V.Global.dDeadDate.PervasiveDate)
+				F.Intrinsic.Control.CallSub(Loadpartudt,"sType","Dead")
+			F.Intrinsic.Control.EndIf
+
+			F.ODBC.con!rst.MoveNext
+		F.Intrinsic.Control.Loop
+	F.Intrinsic.Control.EndIf
+F.Intrinsic.Control.Else
+	F.Intrinsic.UI.Msgbox("You must select one of the three options.")
+	F.Intrinsic.Control.ExitSub
+F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.CallSub(Loadtable)
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("cmdPrint_Click_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3536_Slow_Dead_Parts_Cert.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Ss_slow_dead_parts_unload)
+Function.Intrinsic.Control.EndIf
+
+
+Program.Sub.cmdPrint_Click.End
+
+Program.Sub.CallBI.Start
+F.Intrinsic.Control.SetErrorHandler("CallBI_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+V.Local.iRet.Declare(String)
+
+F.Global.BI.StopLogging(V.Global.iLogID)
+F.Global.BI.RunReportPreProcessor(V.Global.iBIRUNID,V.Global.iLogID,"","","",-1,True,"",-1,"",-1,"","",V.Local.iRet)
+F.Intrinsic.Control.CallSub(Ss_slow_dead_parts_unload)
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("CallBI_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3536_Slow_Dead_Parts_Cert.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Ss_slow_dead_parts_unload)
+Function.Intrinsic.Control.EndIf
+
+
+Program.Sub.CallBI.End
+
+Program.Sub.LoadTable.Start
+F.Intrinsic.Control.SetErrorHandler("LoadTable_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+V.Local.sSQL.Declare(String)
+
+F.Intrinsic.Control.If(V.uGlobal.uPart.UBound,>,-1)
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uPart!BIRUNID,"BIRUNID")
+	F.Intrinsic.Variable.UDTSetMemberValue(V.uGlobal.uPart!BIRUNID,V.Global.iBIRUNID)
+	V.Local.sSQL.Set("SELECT * FROM GCG_3536_SLOW_DEAD")
+	F.ODBC.Connection!con.OpenLocalRecordsetRW("rst",V.Local.sSQL)
+	F.Intrinsic.Variable.SaveUDTToRecordSet("con","rst","V.uGlobal.uPart")
+	F.ODBC.con!rst.Close
+F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.CallSub(Callbi)
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("LoadTable_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3536_Slow_Dead_Parts_Cert.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Ss_slow_dead_parts_unload)
+Function.Intrinsic.Control.EndIf
+
+
+Program.Sub.LoadTable.End
+
+Program.Sub.LoadPartUDT.Start
+F.Intrinsic.Control.SetErrorHandler("LoadPartUDT_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+V.Local.sSQL.Declare(String)
+
+F.Intrinsic.String.Build("SELECT Top 1 H.PART, H.LOCATION, H.DATE_HISTORY, H.CODE_TRANSACTION, H.TRANSACTION_DESC, M.DESCRIPTION, M.QTY_ONHAND,M.AMT_COST, '{0}' AS TYPE FROM V_INVENTORY_HIST H,V_INVENTORY_MSTR M WHERE H.PART = M.PART AND H.PART = '{1}' AND H.DATE_HISTORY = '{2}'",V.Args.sType,V.Global.sPart,V.Global.dHist.PervasiveDate,V.Local.sSQL)
+F.ODBC.Connection!con.OpenLocalRecordsetRO("rst2",V.Local.sSQL)
+F.Intrinsic.Control.If(V.ODBC.con!rst2.EOF,<>,True)
+	F.Intrinsic.Variable.LoadUDTFromRecordset("con","rst2","V.uGlobal.uPart",True)
+F.Intrinsic.Control.EndIf
+F.ODBC.con!rst2.Close
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("LoadPartUDT_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3536_Slow_Dead_Parts_Cert.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Ss_slow_dead_parts_unload)
+Function.Intrinsic.Control.EndIf
+
+
+Program.Sub.LoadPartUDT.End
+
+Program.Sub.Comments.Start
+${$0$}$GCG_Slow_Dead_Parts_Cert$}$BCC$}$7/31/2015
+${$2$}$$}$$}$1$}$4$}$GCG_Slow_Dead_Parts_Cert.rpt$}$10/6/2015 4:01:33 PM$}$This is the report file that the program uses.
+${$2$}$$}$$}$0$}$4$}$GCG_3536_SLOW_DEAD$}$10/6/2015 3:58:11 PM$}$CREATE TABLE "GCG_3536_SLOW_DEAD"(
+ "BIRUNID" BIGINT NOT NULL ,
+ "PART" VARCHAR(20),
+ "LOCATION" VARCHAR(2),
+ "DATE_HISTORY" DATE,
+ "CODE_TRANSACTION" VARCHAR(3),
+ "TRANSACTION_DESC" VARCHAR(15),
+ "DESCRIPTION" VARCHAR(50),
+ "QTY_ONHAND" NUMERIC(12,4),
+ "AMT_COST" NUMERIC(12,4),
+ "TYPE" VARCHAR(6));
+${$3$}$0$}$$}$0$}$-1$}$$}$12:00:00 AM$}$A report is needed that identifies slow moving and dead inventory items. An item is considered slow if it hasn't had any activity in at least 6 months and and inventory item would be considered dead if it had no activity in over one year.
+${$4$}$0$}$$}$0$}$-1$}$BCC$}$10/6/2015 4:04:08 PM$}$GS Certified. Cleaned up code. Added error handling. Sped up code.
+Program.Sub.Comments.End
+Program.Sub.ScreenSS.Start
+SS_Form1{{CAPTION::Slow/Dead Parts
+SS_Form1.CTRL{{NAME::lbl1\\TYPE::1\\CAPTION::Select Which Parts To Show\\GROUP::-1\\BROWSER::0\\SIZE::1
+SS_Form1.CTRL{{NAME::cboSDP\\TYPE::3\\TABSTOP::1\\GROUP::-1\\BROWSER::0\\SIZE::1
+SS_Form1.CTRL{{NAME::cmdPrint\\TYPE::5\\CAPTION::Print\\GROUP::-1\\BROWSER::0\\SIZE::1
+
+Program.Sub.ScreenSS.End
+
