@@ -305,7 +305,7 @@ Function.Intrinsic.Control.EndIf
 Program.Sub.LoadPartUDT.End
 
 Program.Sub.Comments.Start
-${$0$}$GCG_Slow_Dead_Parts_Cert$}$BCC$}$7/31/2015
+${$0$}$GCG_Slow_Dead_Parts_Cert$}$BCC$}$7/31/2015$}$False
 ${$2$}$$}$$}$1$}$4$}$GCG_Slow_Dead_Parts_Cert.rpt$}$10/6/2015 4:01:33 PM$}$This is the report file that the program uses.
 ${$2$}$$}$$}$0$}$4$}$GCG_3536_SLOW_DEAD$}$10/6/2015 3:58:11 PM$}$CREATE TABLE "GCG_3536_SLOW_DEAD"(
  "BIRUNID" BIGINT NOT NULL ,
@@ -321,6 +321,7 @@ ${$2$}$$}$$}$0$}$4$}$GCG_3536_SLOW_DEAD$}$10/6/2015 3:58:11 PM$}$CREATE TABLE "G
 ${$3$}$0$}$$}$0$}$-1$}$$}$12:00:00 AM$}$A report is needed that identifies slow moving and dead inventory items. An item is considered slow if it hasn't had any activity in at least 6 months and and inventory item would be considered dead if it had no activity in over one year.
 ${$4$}$0$}$$}$0$}$-1$}$BCC$}$10/6/2015 4:04:08 PM$}$GS Certified. Cleaned up code. Added error handling. Sped up code.
 Program.Sub.Comments.End
+
 Program.Sub.ScreenSS.Start
 SS_Form1{{CAPTION::Slow/Dead Parts
 SS_Form1.CTRL{{NAME::lbl1\\TYPE::1\\CAPTION::Select Which Parts To Show\\GROUP::-1\\BROWSER::0\\SIZE::1
